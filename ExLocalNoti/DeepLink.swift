@@ -29,23 +29,6 @@ enum DeepLink {
       return "/first" // 주의: url.path값은 '/'로 시작하므로, path에도 '/'을 붙여주기
     }
   }
-  private var url: URL? {
-    URL(string: "\(Self.scheme)://\(self.host)\(self.query)")
-  }
-  private var query: String {
-    let queryItems: [URLQueryItem]
-    switch self {
-    case .login:
-      queryItems = []
-    case .main(let message, let desc):
-      queryItems = [message, desc]
-        .compactMap { URLQueryItem(name: String(describing: $0), value: $0) }
-    }
-    return queryItems.reduce(into: "") {
-      guard let value = $1.value else { return }
-      $0 += "\($0.isEmpty ? "?" : "&")\($1.name)=\(value)"
-    }
-  }
   
   init?(string: String) {
     guard
@@ -59,8 +42,8 @@ enum DeepLink {
       self = .login
     case .main(message: nil, desc: nil):
       self = .main(
-        message: url.getQueryParameterValue(name: "message"),
-        desc: url.getQueryParameterValue(name: "desc")
+        message: url.getQueryParameterValue(key: "message"),
+        desc: url.getQueryParameterValue(key: "desc")
       )
     default:
       return nil
@@ -74,10 +57,10 @@ enum DeepLink {
 }
 
 extension URL {
-  func getQueryParameterValue(name: String) -> String? {
+  func getQueryParameterValue(key: String) -> String? {
     URLComponents(url: self, resolvingAgainstBaseURL: true)?
       .queryItems?
-      .first(where: { $0.name == name })?
+      .first(where: { $0.name == key })?
       .value
   }
 }
