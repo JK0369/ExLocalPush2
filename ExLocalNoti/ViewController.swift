@@ -17,13 +17,28 @@ class ViewController: UIViewController {
     button.translatesAutoresizingMaskIntoConstraints = false
     return button
   }()
+  private let label: UILabel = {
+    let label = UILabel()
+    label.text = "login 화면"
+    label.textColor = .black
+    label.font = .systemFont(ofSize: 30)
+    label.translatesAutoresizingMaskIntoConstraints = false
+    return label
+  }()
+  
   override func viewDidLoad() {
     super.viewDidLoad()
-    
+      
+    self.view.backgroundColor = .white
     self.view.addSubview(self.button)
+    self.view.addSubview(self.label)
     NSLayoutConstraint.activate([
       self.button.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
       self.button.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+    ])
+    NSLayoutConstraint.activate([
+      self.label.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 60),
+      self.label.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
     ])
   }
   
@@ -35,10 +50,10 @@ class ViewController: UIViewController {
     content.badge = 2
     
     let request = UNNotificationRequest(
-      identifier: "local noti",
+      identifier: "my-app://main/first?message=deeplink-test-message&desc=test-desc",
       content: content,
       trigger: UNTimeIntervalNotificationTrigger(
-        timeInterval: 3,
+        timeInterval: 1.5,
         repeats: false
       )
     )

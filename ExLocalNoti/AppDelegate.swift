@@ -10,34 +10,22 @@ import UserNotifications
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+  var window: UIWindow?
+  
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-    // alert - 알림이 화면에 노출
-    // sound - 소리
-    // badge - 빨간색 동그라미 숫자
     UNUserNotificationCenter.current().requestAuthorization(
       options: [.alert, .sound, .badge],
       completionHandler: { (granted, error) in
         print("granted notification, \(granted)")
       }
     )
-    
     UNUserNotificationCenter.current().delegate = self
     
+    self.window = UIWindow(frame: UIScreen.main.bounds)
+    self.presentLogin()
+    self.window?.makeKeyAndVisible()
+    
     return true
-  }
-
-  // MARK: UISceneSession Lifecycle
-
-  func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-    // Called when a new scene session is being created.
-    // Use this method to select a configuration to create the new scene with.
-    return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-  }
-
-  func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-    // Called when the user discards a scene session.
-    // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-    // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
   }
 }
 
@@ -50,9 +38,27 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     didReceive response: UNNotificationResponse,
     withCompletionHandler completionHandler: @escaping () -> Void
   ) {
-    if response.notification.request.identifier == "local noti" {
-      print("딥링크 수행")
+    guard let deepLink = DeepLink(string: response.notification.request.identifier) else { return }
+    switch deepLink {
+    case .login:
+      self.presentLogin()
+    case let .main(message, desc):
+      self.presentMain(message: message, desc: desc)
     }
     completionHandler()
+  }
+}
+
+// MARK: AppDelegate + Flow
+extension AppDelegate {
+  func presentLogin() {
+    let vc = ViewController()
+    self.window?.rootViewController = vc
+    vc.view.layoutIfNeeded()
+  }
+  func presentMain(message: String?, desc: String?) {
+    let vc = MainVC(message: message, desc: desc)
+    self.window?.rootViewController = vc
+    vc.view.layoutIfNeeded()
   }
 }
